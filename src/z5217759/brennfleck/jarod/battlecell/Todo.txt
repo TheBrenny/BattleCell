@@ -1,0 +1,20 @@
+TODO:
+
+ - Entities
+   - Player (Has AI!)
+   - AI
+     - Try better pathfinding rules? Don't waste time building mesh-maps just make it look like it works well using A*, and then figure out how meshmaps will be introduced...
+ 
+ - Networking
+   - Build Packet
+ 
+ - Lobby Screen
+   - Join Game
+   - Create Server
+ 
+ - The Actual Map thing!
+ 
+ - Heads Up Display
+ 
+ 
+Literally just copy and paste a lot of the shit from the Zombies game, as you've been doing!
