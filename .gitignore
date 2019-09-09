@@ -10,6 +10,9 @@ local.properties
 .loadpath
 .recommenders
 
+# VSCode Folder
+.vscode/
+
 # External tool builders
 .externalToolBuilders/
 

@@ -20,13 +20,12 @@ import z5217759.brennfleck.jarod.battlecell.level.tile.BCTile;
  * This is the main game.
  *
  * @author z5217759 - Jarod Brennfleck
- * @assessmentItem Computer Games - 17. Generic Odyssey - 2D Game using Java
+ * @assessmentItem Computer Games - 15 Software Engineering - Develop a 2D Game
  * @date 01 Aug 19
  *
  */
 public class BattleCell extends MainGame {
 	private String username;
-	private boolean debugDown = false;
 	
 	public BattleCell(String[] args) {
 		super(args, "BattleCell", "z5217759.brennfleck.jarod.battlecell");
@@ -34,15 +33,18 @@ public class BattleCell extends MainGame {
 		this.setCursor(this.getCursor());
 	}
 	
-	protected void loadAI() {}
+	protected void loadAI() {
+	}
 	protected void loadImages() {
 		String loc = getGameInfo().packageRoot() + ".res";
 		Images.addImage(loc, "cursor");
 		Images.addImage(loc, "tile_map");
+		Images.addImage(loc, "entity_map");
 		Images.addImage(loc, "title");
 		Images.addImage(loc, "background");
 	}
-	protected void loadItems() {}
+	protected void loadItems() {
+	}
 	protected void loadTiles() {
 		for(BCTile.Type tileType : BCTile.Type.values()) {
 			Tile.registerTile(new BCTile(tileType));
@@ -54,7 +56,14 @@ public class BattleCell extends MainGame {
 		KeyBindings.addKey("cam_down", KeyEvent.VK_S, false, true);
 		KeyBindings.addKey("cam_left", KeyEvent.VK_A, false, true);
 		KeyBindings.addKey("cam_right", KeyEvent.VK_D, false, true);
+		KeyBindings.addKey("debug", KeyEvent.VK_P, true, true);
+		
 		// Just a click and let loose game?
+		
+		if(isDebugging()) {
+			KeyBindings.pressKey("debug", true);
+			KeyBindings.pressKey("debug", false);
+		}
 	}
 	
 	public boolean initialise() {
@@ -66,16 +75,8 @@ public class BattleCell extends MainGame {
 	@Override
 	public void update() {
 		super.update();
-		if(KeyBindings.isPressed("debug")) {
-			if(!debugDown) {
-				
-				debugDown = true;
-				this.debugging = !this.debugging;
-				Logger.log("Visual debugging is [{0}].", (Object) (this.debugging ? "on" : "off"));
-			}
-		} else {
-			debugDown = false;
-		}
+		if(KeyBindings.isPressed("debug")) setDebug(true);
+		else setDebug(false);
 	}
 	
 	public String getUsername() {
