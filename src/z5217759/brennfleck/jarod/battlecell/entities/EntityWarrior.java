@@ -1,29 +1,35 @@
 package z5217759.brennfleck.jarod.battlecell.entities;
 
+import z5217759.brennfleck.jarod.battlecell.entities.ai.WarriorStateMachine;
+
 public class EntityWarrior extends BCEntity {
-	int countSwitch = 0;
+	public static final int[] IDLE_COUNTER_TRIGGERS = DEFAULT_IDLE_COUNTER_TRIGGERS;
+	public static final int[] WALK_COUNTER_TRIGGERS = DEFAULT_WALK_COUNTER_TRIGGERS;
+	public static final int[] ATTACK_COUNTER_TRIGGERS = {60, 80};
+	public static final int[] DEAD_COUNTER_TRIGGERS = {50};
 	
 	public EntityWarrior(String name, float x, float y) {
 		super(name, x, y, BCEntity.Type.WARRIOR);
-		setCounterTrigger(20, 40);
-		this.setState(State.WALK);
+		setBrain(new WarriorStateMachine(this));
 	}
 	
 	public void update() {
-		if(countSwitch == 10) {
-			this.setState(State.IDLE);
-		} else if(countSwitch == 20) {
-			this.setState(State.WALK);
-			countSwitch = 0;
-		}
 	}
-	public void counterEvent(int counter, int counterStage) {
-		incrementSprite();
-		countSwitch++;
-		
-		if(countSwitch % 5 == 0) {
-			if(this.isFacingRight()) this.setFacingLeft();
-			else if(this.isFacingLeft()) this.setFacingRight();
+	@Override
+	public void onAnimationStateChanged(AnimationState state) {
+		switch(state) {
+		case IDLE:
+			setCounterTrigger(IDLE_COUNTER_TRIGGERS);
+			break;
+		case WALK:
+			setCounterTrigger(WALK_COUNTER_TRIGGERS);
+			break;
+		case ATTACK:
+			setCounterTrigger(ATTACK_COUNTER_TRIGGERS);
+			break;
+		case DEAD:
+			setCounterTrigger(DEAD_COUNTER_TRIGGERS);
+			break;
 		}
 	}
 }

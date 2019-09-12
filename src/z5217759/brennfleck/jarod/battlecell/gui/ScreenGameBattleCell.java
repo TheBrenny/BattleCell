@@ -7,7 +7,8 @@ import com.thebrenny.jumg.level.tiles.Tile;
 import com.thebrenny.jumg.util.MathUtil;
 
 import z5217759.brennfleck.jarod.battlecell.BattleCell;
-import z5217759.brennfleck.jarod.battlecell.entities.EntityWarrior;
+import z5217759.brennfleck.jarod.battlecell.entities.EntityDummy;
+import z5217759.brennfleck.jarod.battlecell.entities.EntityMagician;
 import z5217759.brennfleck.jarod.battlecell.hud.BCHudManager;
 import z5217759.brennfleck.jarod.battlecell.level.BattleCellLevel;
 
@@ -17,9 +18,11 @@ public class ScreenGameBattleCell extends ScreenGame {
 		setCameraX(-Screen.getWidth() / 2);
 		setCameraY(-Screen.getHeight() / 2);
 		
-		// TESTING!
-		EntityWarrior player = (EntityWarrior) new EntityWarrior(BattleCell.getMainGame().getUsername(), 0, 0).setControlled(true);
+		// TODO: TESTING!
+		EntityMagician player = (EntityMagician) new EntityMagician(BattleCell.getMainGame().getUsername(), 0, 0).setControlled(true);
 		this.level.addEntity(player);
+		//this.level.addEntity(new EntityWarrior("WARRIOR", 10, -11));
+		this.level.addEntity(new EntityDummy("DUMMY", 10, 10));
 		//setEntityToFollow(player);
 	}
 	

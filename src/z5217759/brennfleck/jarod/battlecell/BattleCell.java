@@ -34,6 +34,7 @@ public class BattleCell extends MainGame {
 	}
 	
 	protected void loadAI() {
+		
 	}
 	protected void loadImages() {
 		String loc = getGameInfo().packageRoot() + ".res";
@@ -80,7 +81,7 @@ public class BattleCell extends MainGame {
 	}
 	
 	public String getUsername() {
-		return username;
+		return this.username;
 	}
 	
 	public void setUsername(String username) {
