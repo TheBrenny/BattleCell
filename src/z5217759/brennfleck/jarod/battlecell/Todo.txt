@@ -1,11 +1,5 @@
 TODO:
 
- - Entities
-   - Player (Has AI!)
-   - AI
-     - Working on Pathfinding! A* is implemented, you just need to make A*Trace a thing!
-     - You need to let the entities Pathfind, probably do this in BCEntity? but they all have different distances from the goal?
- 
  - Networking
    - Build Packet
  

@@ -12,6 +12,7 @@ import com.thebrenny.jumg.entities.ai.pathfinding.NodeList;
 import com.thebrenny.jumg.entities.ai.states.State;
 import com.thebrenny.jumg.gui.Screen;
 import com.thebrenny.jumg.level.tiles.Tile;
+import com.thebrenny.jumg.util.Angle;
 import com.thebrenny.jumg.util.MathUtil;
 
 import z5217759.brennfleck.jarod.battlecell.entities.BCEntity;
@@ -36,7 +37,7 @@ public enum BCState implements State<BCEntity> {
 				NodeList path = brain.getPathToTarget();
 				if(path != null) {
 					int proximTest = path.testStepReached(entity.getAnchoredTileX(), entity.getAnchoredTileY(), NodeList.DEFAULT_TEST_DISTANCE);
-					if(brain.getTargetDistance() > MathUtil.distance(brain.getTarget().getAnchoredTileLocation(), entity.getAnchoredTileLocation())) brain.changeState(BCState.ATTACK);
+					if(brain.getTargetDistance() >= MathUtil.distance(entity.getAnchoredTileLocation(), brain.getTarget().getAnchoredTileLocation())) brain.changeState(BCState.ATTACK);
 					else entity.addMovementTo(path.getCurrentStep());
 				}
 			} else brain.changeState(BCState.IDLE);
@@ -67,7 +68,8 @@ public enum BCState implements State<BCEntity> {
 			BCStateMachine brain = entity.getBrain();
 			
 			if(brain.hasTarget()) {
-				if(brain.getTargetDistance() > MathUtil.distance(brain.getTarget().getAnchoredTileLocation(), entity.getAnchoredTileLocation())) {
+				if(brain.getTargetDistance() >= MathUtil.distance(entity.getAnchoredTileLocation(), brain.getTarget().getAnchoredTileLocation())) {
+					entity.setAngle(Angle.getAngle(entity.getAnchoredTileLocation(), brain.getTarget().getAnchoredTileLocation()));
 					// attack! -- this'll probs be the start of the message system. rip.
 				} else brain.changeState(BCState.PERSUE);
 				if(!brain.getTarget().isAlive()) brain.changeState(BCState.IDLE);

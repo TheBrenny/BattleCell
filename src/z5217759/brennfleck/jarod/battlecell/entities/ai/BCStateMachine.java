@@ -49,9 +49,10 @@ public abstract class BCStateMachine extends DefaultStateMachine<BCEntity, BCSta
 		this.target = target;
 	}
 	
-	public NodeList getPathToTarget() {
+	public synchronized NodeList getPathToTarget() {
 		if(pathToTarget == null) {
-			this.pathToTarget = new PathFinding(this.getOwner().getAnchoredTileLocation(), this.getTarget().getAnchoredTileLocation(), this.getOwner().getLevel()).search(getTargetDistance(), true);
+			PathFinding pf = new PathFinding(this.getOwner().getAnchoredTileLocation(), this.getTarget().getAnchoredTileLocation(), this.getOwner().getLevel());
+			this.pathToTarget = pf.search(true);
 			this.pathLifeLeft = PATH_LIFE;
 		}
 		return pathToTarget;

@@ -56,7 +56,9 @@ public abstract class BCEntity extends EntityLiving {
 	}
 	
 	public final void tick() {
-		if(this.brain != null) this.brain.tick();
+		if(this.brain != null) {
+			this.brain.tick();
+		}
 		updateCounters();
 		update();
 		move();
@@ -68,15 +70,16 @@ public abstract class BCEntity extends EntityLiving {
 	}
 	
 	public Entity setAngle(float angle) {
-		facingRight = angle % 360 < 180;
-		return super.setAngle(angle);
+		Entity e = super.setAngle(angle);
+		facingRight = getAngle().getAngle() < 180;
+		return e;
 	}
 	public Entity setAngle(Angle angle) {
-		facingRight = angle.getAngle() % 360 < 180;
-		return super.setAngle(angle);
+		Entity e = super.setAngle(angle);
+		facingRight = getAngle().getAngle() < 180;
+		return e;
 	}
 	
-	@Override
 	public float heal(float amount) {
 		this.healthCounter = this.healthCounterMax;
 		return super.heal(amount);
@@ -112,7 +115,7 @@ public abstract class BCEntity extends EntityLiving {
 	 *        - Which stage was triggered. 0 is reset.
 	 */
 	public void counterEvent(int counter, int counterStage) {
-		incrementSprite();
+		setSpriteMeta(counterStage);
 	}
 	
 	public AnimationState getAnimationState() {
@@ -121,8 +124,9 @@ public abstract class BCEntity extends EntityLiving {
 	public void setAnimationState(AnimationState state) {
 		if(this.animationState != state) {
 			this.animationState = state;
+			this.setSpriteMeta(0);
 			this.requestImageUpdate();
-			onAnimationStateChanged(this.animationState);
+			this.onAnimationStateChanged(this.animationState);
 		}
 	}
 	public abstract void onAnimationStateChanged(AnimationState state);
