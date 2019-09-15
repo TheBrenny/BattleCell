@@ -33,14 +33,12 @@ public class BattleCell extends MainGame {
 		this.setCursor(this.getCursor());
 	}
 	
-	protected void loadAI() {
-		
-	}
 	protected void loadImages() {
 		String loc = getGameInfo().packageRoot() + ".res";
 		Images.addImage(loc, "cursor");
 		Images.addImage(loc, "tile_map");
 		Images.addImage(loc, "entity_map");
+		Images.addImage(loc, "small_entity_map");
 		Images.addImage(loc, "title");
 		Images.addImage(loc, "background");
 	}

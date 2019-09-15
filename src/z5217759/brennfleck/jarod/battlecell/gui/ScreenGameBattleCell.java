@@ -24,32 +24,25 @@ public class ScreenGameBattleCell extends ScreenGame {
 		this.level.addEntity(player);
 		this.level.addEntity(new EntityWarrior("WARRIOR", 10, -11));
 		this.level.addEntity(new EntityArcher("ARCHER", -10, -11));
-		//setEntityToFollow(player);
+		this.setEntityToFollow(player);
+		this.moveCamera();
 	}
 	
 	public void moveCamera() {
-		long camX = (long) (KeyBindings.isPressed("cam_left") ? -1 : KeyBindings.isPressed("cam_right") ? 1 : 0);
-		long camY = (long) (KeyBindings.isPressed("cam_up") ? -1 : KeyBindings.isPressed("cam_down") ? 1 : 0);
-		long camMoveX = (long) (camX * Screen.getCameraSpeed());
-		long camMoveY = (long) (camY * Screen.getCameraSpeed());
-		
-		long newX = (long) MathUtil.clamp(-getMapWidth() / 2, getCameraX() + camMoveX, (getMapWidth() / 2) - getWidth());
-		long newY = (long) MathUtil.clamp(-getMapHeight() / 2, getCameraY() + camMoveY, (getMapHeight() / 2) - getHeight());
-		
-		setCameraX(newX);
-		setCameraY(newY);
+		if(this.entityToFollow != null) super.moveCamera();
+		else {
+			long camX = (long) (KeyBindings.isPressed("cam_left") ? -1 : KeyBindings.isPressed("cam_right") ? 1 : 0);
+			long camY = (long) (KeyBindings.isPressed("cam_up") ? -1 : KeyBindings.isPressed("cam_down") ? 1 : 0);
+			long camMoveX = (long) (camX * Screen.getCameraSpeed());
+			long camMoveY = (long) (camY * Screen.getCameraSpeed());
+			
+			long newX = (long) MathUtil.clamp(-getMapWidth() / 2, getCameraX() + camMoveX, (getMapWidth() / 2) - getWidth());
+			long newY = (long) MathUtil.clamp(-getMapHeight() / 2, getCameraY() + camMoveY, (getMapHeight() / 2) - getHeight());
+			
+			setCameraX(newX);
+			setCameraY(newY);
+		}
 	}
 	
-	@Override
-	public void tick() {
-		super.tick();
-		moveCamera();
-	}
 	
-	private long getMapWidth() {
-		return (long) (this.getLevel().getMapWidth() * Tile.TILE_SIZE);
-	}
-	private long getMapHeight() {
-		return (long) (this.getLevel().getMapHeight() * Tile.TILE_SIZE);
-	}
 }

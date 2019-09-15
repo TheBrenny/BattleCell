@@ -14,14 +14,16 @@ import com.thebrenny.jumg.util.Angle;
 import com.thebrenny.jumg.util.Images;
 import com.thebrenny.jumg.util.MathUtil;
 
-import z5217759.brennfleck.jarod.battlecell.entities.ai.BCStateMachine;
+import z5217759.brennfleck.jarod.battlecell.entities.ai.EntityState;
+import z5217759.brennfleck.jarod.battlecell.entities.ai.EntityStateMachine;
 
 public abstract class BCEntity extends EntityLiving {
 	//TODO: Make these whichever is most used.
-	public static final int[] DEFAULT_IDLE_COUNTER_TRIGGERS = {20, 40};
-	public static final int[] DEFAULT_WALK_COUNTER_TRIGGERS = {20, 40};
-	public static final int[] DEFAULT_ATTACK_COUNTER_TRIGGERS = {60, 80};
+	public static final int[] DEFAULT_IDLE_COUNTER_TRIGGERS = {20, 20};
+	public static final int[] DEFAULT_WALK_COUNTER_TRIGGERS = {20, 20};
+	public static final int[] DEFAULT_ATTACK_COUNTER_TRIGGERS = {60, 20};
 	public static final int[] DEFAULT_DEAD_COUNTER_TRIGGERS = {50};
+	private static final int ATTACK_COUNTER_STAGE = 1; // the sprite animation which we actually attack on
 	
 	protected Color color;
 	protected AnimationState animationState;
@@ -30,6 +32,7 @@ public abstract class BCEntity extends EntityLiving {
 	protected int spriteMeta = 0;
 	protected int spriteCounter = 0;
 	protected int[] spriteCounterTriggers = {0};
+	protected boolean stopSpriteCounting = false;
 	
 	protected int healthCounter = 0;
 	protected final int healthCounterMax = 60;
@@ -65,8 +68,8 @@ public abstract class BCEntity extends EntityLiving {
 	}
 	public abstract void update();
 	
-	public BCStateMachine getBrain() {
-		return (BCStateMachine) super.getBrain();
+	public EntityStateMachine getBrain() {
+		return (EntityStateMachine) super.getBrain();
 	}
 	
 	public Entity setAngle(float angle) {
@@ -80,50 +83,60 @@ public abstract class BCEntity extends EntityLiving {
 		return e;
 	}
 	
+	public abstract void attack(BCEntity target);
 	public float heal(float amount) {
 		this.healthCounter = this.healthCounterMax;
 		return super.heal(amount);
 	}
-	
 	public void setCounterTrigger(int ... counters) {
 		this.spriteCounterTriggers = counters;
 		this.spriteCounter = 0;
+		this.stopSpriteCounting = false;
 	}
-	
 	public void updateCounters() {
-		if(spriteCounterTriggers[0] > 0) {
+		if(!this.stopSpriteCounting) {
 			this.spriteCounter++;
-			for(int i = 0; i < spriteCounterTriggers.length; i++) {
-				if(spriteCounter == spriteCounterTriggers[i]) {
-					counterEvent(this.spriteCounter, (i + 1) % spriteCounterTriggers.length);
-					if(i == spriteCounterTriggers.length - 1 && this.animationState.spriteDoesLoop) this.spriteCounter = 0;
-				}
+			// if the sprite meta is less than our triggers length, and we achieved the counter trigger.
+			if(this.spriteMeta < this.spriteCounterTriggers.length && this.spriteCounter >= this.spriteCounterTriggers[this.spriteMeta]) {
+				this.spriteCounter = 0;
+				this.spriteMeta = MathUtil.wrap(0, this.spriteMeta + 1, this.spriteCounterTriggers.length);
+				if(this.spriteMeta == 0 && !this.animationState.spriteDoesLoop) {
+					this.spriteMeta = this.spriteCounterTriggers.length - 1;
+					this.stopSpriteCounting = true;
+				} else counterEvent(this.spriteMeta);
+				setSpriteMeta(this.spriteMeta); // this just makes sure a reset occurs.
 			}
 		}
 		
 		if(healthCounter > 0) this.healthCounter--;
 		this.healthCounter = this.healthCounter < 0 ? 0 : this.healthCounter;
 	}
-	
 	/**
 	 * Called whenever the sprite counter hits a counter trigger as set by
 	 * {@link #setCounterTrigger(int...)}.
 	 * 
-	 * @param counter
-	 *        - The number of the counter.
 	 * @param counterStage
 	 *        - Which stage was triggered. 0 is reset.
 	 */
-	public void counterEvent(int counter, int counterStage) {
-		setSpriteMeta(counterStage);
+	public void counterEvent(int counterStage) {
+		if(this.getBrain().getState() == EntityState.ATTACK && counterStage == ATTACK_COUNTER_STAGE) this.attack(this.getBrain().getTarget());
 	}
-	
+	public int getSpriteMeta() {
+		return spriteMeta;
+	}
+	public void setSpriteMeta(int spriteMeta) {
+		this.spriteMeta = spriteMeta;
+		this.spriteMeta %= this.spriteCounterTriggers.length;
+		
+		this.requestImageUpdate();
+	}
 	public AnimationState getAnimationState() {
 		return this.animationState;
 	}
 	public void setAnimationState(AnimationState state) {
 		if(this.animationState != state) {
 			this.animationState = state;
+			this.stopSpriteCounting = false;
 			this.setSpriteMeta(0);
 			this.requestImageUpdate();
 			this.onAnimationStateChanged(this.animationState);
@@ -144,20 +157,6 @@ public abstract class BCEntity extends EntityLiving {
 	}
 	public boolean isFacingLeft() {
 		return !this.facingRight;
-	}
-	
-	public int getSpriteMeta() {
-		return spriteMeta;
-	}
-	public void incrementSprite() {
-		this.spriteMeta++;
-		this.setSpriteMeta(spriteMeta);
-	}
-	public void setSpriteMeta(int spriteMeta) {
-		this.spriteMeta = spriteMeta;
-		this.spriteMeta %= 2;
-		
-		this.requestImageUpdate();
 	}
 	
 	public void showHealthBar() {
@@ -218,7 +217,7 @@ public abstract class BCEntity extends EntityLiving {
 		WARRIOR(0, 0, 0.05F, 1, 1),
 		MAGICIAN(1, 2, 0.045F, 7, 0.7F),
 		ARCHER(2, 4, 0.055F, 13, 0.45F),
-		DUMMY(99, 6, 0, 0, 0);
+		DUMMY(99, 6, 1, 0, 0);
 		
 		public final int id;
 		public final int tileMapY;

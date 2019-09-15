@@ -1,5 +1,7 @@
 TODO:
 
+ * Entity Messaging system!
+
  - Networking
    - Build Packet
  
@@ -8,6 +10,3 @@ TODO:
    - Create Server
  
  - Heads Up Display
- 
- 
-Literally just copy and paste a lot of the shit from the Zombies game, as you've been doing!

@@ -13,9 +13,11 @@ public class EntityWarrior extends BCEntity {
 		setBrain(new WarriorStateMachine(this));
 	}
 	
+	public void attack(BCEntity target) {
+		// set item state and position
+	}
 	public void update() {
 	}
-	@Override
 	public void onAnimationStateChanged(AnimationState state) {
 		switch(state) {
 		case IDLE:

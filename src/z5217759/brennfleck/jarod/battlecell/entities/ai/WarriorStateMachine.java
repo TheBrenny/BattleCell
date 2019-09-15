@@ -3,7 +3,7 @@ package z5217759.brennfleck.jarod.battlecell.entities.ai;
 import z5217759.brennfleck.jarod.battlecell.entities.BCEntity.Type;
 import z5217759.brennfleck.jarod.battlecell.entities.EntityWarrior;
 
-public class WarriorStateMachine extends BCStateMachine {
+public class WarriorStateMachine extends EntityStateMachine {
 	public WarriorStateMachine(EntityWarrior owner) {
 		super(owner);
 	}

@@ -12,8 +12,14 @@ public class EntityMagician extends BCEntity {
         super(name, x, y, BCEntity.Type.MAGICIAN);
         setBrain(new MagicianStateMachine(this));
     }
+
+    public void attack(BCEntity target) {
+        // TODO: using the message system, the postman will add the entity to the level instead of the owner!
+        this.getLevel().addEntity(new EntityMagicBall(this.getAnchoredTileX(), this.getAnchoredTileY(), this, this.getBrain().getTarget()));
+    }
     public void update() {
     }
+    
     public void onAnimationStateChanged(AnimationState state) {
         switch(state) {
         case IDLE:

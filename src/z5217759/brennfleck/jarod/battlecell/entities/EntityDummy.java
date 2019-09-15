@@ -23,4 +23,6 @@ public class EntityDummy extends BCEntity {
     }
     public void onAnimationStateChanged(AnimationState state) {
     }
+    public void attack(BCEntity target) {
+    }
 }

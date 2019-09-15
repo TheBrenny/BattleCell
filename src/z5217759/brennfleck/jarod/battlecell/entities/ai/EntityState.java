@@ -18,34 +18,34 @@ import com.thebrenny.jumg.util.MathUtil;
 import z5217759.brennfleck.jarod.battlecell.entities.BCEntity;
 import z5217759.brennfleck.jarod.battlecell.entities.BCEntity.AnimationState;
 
-public enum BCState implements State<BCEntity> {
+public enum EntityState implements State<BCEntity> {
 	IDLE(AnimationState.IDLE) {
 		@Override
 		public void tick(BCEntity entity) {
-			BCStateMachine brain = entity.getBrain();
+			EntityStateMachine brain = entity.getBrain();
 			
 			brain.setNextTarget();
 			
-			if(brain.hasTarget()) brain.changeState(BCState.PERSUE);
+			if(brain.hasTarget()) brain.changeState(EntityState.PERSUE);
 		}
 	},
 	PERSUE(AnimationState.WALK) {
 		public void tick(BCEntity entity) {
-			BCStateMachine brain = entity.getBrain();
+			EntityStateMachine brain = entity.getBrain();
 			
 			if(brain.hasTarget() && brain.getTarget().isAlive()) {
 				NodeList path = brain.getPathToTarget();
 				if(path != null) {
 					int proximTest = path.testStepReached(entity.getAnchoredTileX(), entity.getAnchoredTileY(), NodeList.DEFAULT_TEST_DISTANCE);
-					if(brain.getTargetDistance() >= MathUtil.distance(entity.getAnchoredTileLocation(), brain.getTarget().getAnchoredTileLocation())) brain.changeState(BCState.ATTACK);
+					if(brain.getTargetDistance() >= MathUtil.distance(entity.getAnchoredTileLocation(), brain.getTarget().getAnchoredTileLocation())) brain.changeState(EntityState.ATTACK);
 					else entity.addMovementTo(path.getCurrentStep());
 				}
-			} else brain.changeState(BCState.IDLE);
+			} else brain.changeState(EntityState.IDLE);
 		}
 		public void renderDebug(BCEntity entity, Graphics2D g2d, long camX, long camY, long camW, long camH) {
 			super.renderDebug(entity, g2d, camX, camY, camW, camH);
 			
-			BCStateMachine brain = entity.getBrain();
+			EntityStateMachine brain = entity.getBrain();
 			NodeList path = brain.getPathToTarget();
 			if(path != null) {
 				int pathPointSize = 6;
@@ -65,15 +65,15 @@ public enum BCState implements State<BCEntity> {
 	},
 	ATTACK(AnimationState.ATTACK) {
 		public void tick(BCEntity entity) {
-			BCStateMachine brain = entity.getBrain();
+			EntityStateMachine brain = entity.getBrain();
 			
 			if(brain.hasTarget()) {
 				if(brain.getTargetDistance() >= MathUtil.distance(entity.getAnchoredTileLocation(), brain.getTarget().getAnchoredTileLocation())) {
 					entity.setAngle(Angle.getAngle(entity.getAnchoredTileLocation(), brain.getTarget().getAnchoredTileLocation()));
 					// attack! -- this'll probs be the start of the message system. rip.
-				} else brain.changeState(BCState.PERSUE);
-				if(!brain.getTarget().isAlive()) brain.changeState(BCState.IDLE);
-			} else brain.changeState(BCState.IDLE);
+				} else brain.changeState(EntityState.PERSUE);
+				if(!brain.getTarget().isAlive()) brain.changeState(EntityState.IDLE);
+			} else brain.changeState(EntityState.IDLE);
 		}
 	},
 	DEAD(AnimationState.DEAD) {
@@ -85,13 +85,13 @@ public enum BCState implements State<BCEntity> {
 	},
 	GLOBAL(null) {
 		public void tick(BCEntity entity) {
-			if(!entity.isAlive()) entity.getBrain().changeState(BCState.DEAD);
+			if(!entity.isAlive()) entity.getBrain().changeState(EntityState.DEAD);
 		}
 	};
 	
 	private AnimationState animationState;
 	
-	private BCState(AnimationState animationState) {
+	private EntityState(AnimationState animationState) {
 		this.animationState = animationState;
 	}
 	

@@ -9,15 +9,15 @@ import com.thebrenny.jumg.entities.ai.states.DefaultStateMachine;
 
 import z5217759.brennfleck.jarod.battlecell.entities.BCEntity;
 
-public abstract class BCStateMachine extends DefaultStateMachine<BCEntity, BCState> {
+public abstract class EntityStateMachine extends DefaultStateMachine<BCEntity, EntityState> {
 	public static final int PATH_LIFE = 30;
 	
 	private BCEntity target;
 	private NodeList pathToTarget;
 	private int pathLifeLeft = -1;
 	
-	public BCStateMachine(BCEntity owner) {
-		super(owner, BCState.IDLE, BCState.GLOBAL);
+	public EntityStateMachine(BCEntity owner) {
+		super(owner, EntityState.IDLE, EntityState.GLOBAL);
 	}
 	
 	public void setNextTarget() {
@@ -34,7 +34,12 @@ public abstract class BCStateMachine extends DefaultStateMachine<BCEntity, BCSta
 			}
 		}
 	}
-	
+	public boolean hasTarget() {
+		return this.target != null;
+	}
+	public void setTarget(BCEntity target) {
+		this.target = target;
+	}
 	public BCEntity getTarget() {
 		return this.target;
 	}
@@ -42,13 +47,6 @@ public abstract class BCStateMachine extends DefaultStateMachine<BCEntity, BCSta
 	public float getTargetDistanceSqrd() {
 		return getTargetDistance() * getTargetDistance();
 	}
-	public boolean hasTarget() {
-		return this.target != null;
-	}
-	public void setTarget(BCEntity target) {
-		this.target = target;
-	}
-	
 	public synchronized NodeList getPathToTarget() {
 		if(pathToTarget == null) {
 			PathFinding pf = new PathFinding(this.getOwner().getAnchoredTileLocation(), this.getTarget().getAnchoredTileLocation(), this.getOwner().getLevel());
