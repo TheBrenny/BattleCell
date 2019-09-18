@@ -36,6 +36,7 @@ public enum EntityState implements State<BCEntity> {
 			if(brain.hasTarget() && brain.getTarget().isAlive()) {
 				NodeList path = brain.getPathToTarget();
 				if(path != null) {
+					@SuppressWarnings("unused")
 					int proximTest = path.testStepReached(entity.getAnchoredTileX(), entity.getAnchoredTileY(), NodeList.DEFAULT_TEST_DISTANCE);
 					if(brain.getTargetDistance() >= MathUtil.distance(entity.getAnchoredTileLocation(), brain.getTarget().getAnchoredTileLocation())) brain.changeState(EntityState.ATTACK);
 					else entity.addMovementTo(path.getCurrentStep());
@@ -70,9 +71,12 @@ public enum EntityState implements State<BCEntity> {
 			if(brain.hasTarget()) {
 				if(brain.getTargetDistance() >= MathUtil.distance(entity.getAnchoredTileLocation(), brain.getTarget().getAnchoredTileLocation())) {
 					entity.setAngle(Angle.getAngle(entity.getAnchoredTileLocation(), brain.getTarget().getAnchoredTileLocation()));
-					// attack! -- this'll probs be the start of the message system. rip.
+					// entity.attack(brain.getTarget()); // This is actually called in BCEntity#counterEvent(int).
 				} else brain.changeState(EntityState.PERSUE);
-				if(!brain.getTarget().isAlive()) brain.changeState(EntityState.IDLE);
+				if(!brain.getTarget().isAlive()) {
+					brain.setTarget(null);
+					brain.changeState(EntityState.IDLE);
+				}
 			} else brain.changeState(EntityState.IDLE);
 		}
 	},

@@ -8,7 +8,7 @@ import com.thebrenny.jumg.util.MathUtil;
 public class EntityMagicBall extends EntityProjectile {
     protected Angle spinAngle;
     private int spinCounter = 0;
-    private int spinMax = 50;
+    private int spinMax = 80;
 
     public EntityMagicBall(float x, float y, BCEntity owner, BCEntity target) {
         super(x, y, Type.MAGIC_BALL, owner, target);
@@ -18,7 +18,7 @@ public class EntityMagicBall extends EntityProjectile {
     public void tick() {
         super.tick();
         spinCounter = MathUtil.wrap(0, spinCounter++, spinMax);
-        if(spinCounter == 0) spinAngle.changeAngle(90);
+        if(spinCounter == 0) spinAngle.changeAngle(45);
     }
     public BufferedImage getRawImage() {
         return spinAngle.getRotation(super.getRawImage());

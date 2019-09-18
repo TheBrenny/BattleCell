@@ -14,10 +14,11 @@ public class EntityWarrior extends BCEntity {
 	}
 	
 	public void attack(BCEntity target) {
-		// set item state and position
+		this.getBrain().actuallyHurtTarget();
 	}
 	public void update() {
 	}
+	
 	public void onAnimationStateChanged(AnimationState state) {
 		switch(state) {
 		case IDLE:

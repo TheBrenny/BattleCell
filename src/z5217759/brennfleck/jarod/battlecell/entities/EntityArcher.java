@@ -14,7 +14,6 @@ public class EntityArcher extends BCEntity {
 	}
 	
 	public void attack(BCEntity target) {
-		// set item state and position
 		this.getLevel().addEntity(new EntityArrow(this.getAnchoredTileX(), this.getAnchoredTileY(), this, this.getBrain().getTarget()));
 	}
 	public void update() {

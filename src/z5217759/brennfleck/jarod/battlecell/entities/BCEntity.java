@@ -10,20 +10,28 @@ import java.util.Random;
 
 import com.thebrenny.jumg.entities.Entity;
 import com.thebrenny.jumg.entities.EntityLiving;
+import com.thebrenny.jumg.entities.messaging.Message;
+import com.thebrenny.jumg.entities.messaging.MessageListener;
+import com.thebrenny.jumg.entities.messaging.Postman;
 import com.thebrenny.jumg.util.Angle;
 import com.thebrenny.jumg.util.Images;
+import com.thebrenny.jumg.util.Logger;
 import com.thebrenny.jumg.util.MathUtil;
 
 import z5217759.brennfleck.jarod.battlecell.entities.ai.EntityState;
 import z5217759.brennfleck.jarod.battlecell.entities.ai.EntityStateMachine;
+import z5217759.brennfleck.jarod.battlecell.entities.messages.BCMessage;
+import z5217759.brennfleck.jarod.battlecell.entities.messages.MessageAttack;
 
-public abstract class BCEntity extends EntityLiving {
+public abstract class BCEntity extends EntityLiving implements MessageListener<BCEntity> {
 	//TODO: Make these whichever is most used.
 	public static final int[] DEFAULT_IDLE_COUNTER_TRIGGERS = {20, 20};
 	public static final int[] DEFAULT_WALK_COUNTER_TRIGGERS = {20, 20};
 	public static final int[] DEFAULT_ATTACK_COUNTER_TRIGGERS = {60, 20};
 	public static final int[] DEFAULT_DEAD_COUNTER_TRIGGERS = {50};
 	private static final int ATTACK_COUNTER_STAGE = 1; // the sprite animation which we actually attack on
+	
+	private final Type type;
 	
 	protected Color color;
 	protected AnimationState animationState;
@@ -35,7 +43,7 @@ public abstract class BCEntity extends EntityLiving {
 	protected boolean stopSpriteCounting = false;
 	
 	protected int healthCounter = 0;
-	protected final int healthCounterMax = 60;
+	protected final int healthCounterMax = 120;
 	protected final int healthFadeCounter = 15;
 	
 	private boolean isControlled = false;
@@ -45,9 +53,11 @@ public abstract class BCEntity extends EntityLiving {
 	}
 	public BCEntity(String name, float x, float y, Type type, Color color) {
 		super(name, type.id, x, y, 0, type.tileMapY, type.speed, 7.0F);
+		this.type = type;
 		setAnchor((float) (Entity.ENTITY_SIZE / 2), (float) (Entity.ENTITY_SIZE / 2));
 		this.color = new Color(color.getRed(), color.getGreen(), color.getBlue(), 100);
 		this.setAnimationState(AnimationState.IDLE);
+		Postman.getInstance().registerListener(this);
 	}
 	
 	public boolean isControlled() {
@@ -67,6 +77,28 @@ public abstract class BCEntity extends EntityLiving {
 		move();
 	}
 	public abstract void update();
+	public final void handleMessage(Message message) {
+		if(!(message instanceof BCMessage)) return;
+		
+		BCMessage msg = (BCMessage) message;
+		if(msg.getReceiver() != this) return;
+		if(msg instanceof BCMessage) {
+			switch(msg.getType()) {
+			case ATTACK:
+				hurt(((MessageAttack) msg).getDamage());
+				break;
+			case TARGET:
+				// influence retaliation modifier.
+				break;
+			default:
+				iHaveMail((BCMessage) msg);
+				break;
+			}
+		}
+	}
+	public void iHaveMail(BCMessage msg) {
+		Logger.log("Unhandled message: " + msg.getUniqueString());
+	}
 	
 	public EntityStateMachine getBrain() {
 		return (EntityStateMachine) super.getBrain();
@@ -179,6 +211,10 @@ public abstract class BCEntity extends EntityLiving {
 		return bi;
 	}
 	
+	public Type getType() {
+		return this.type;
+	}
+	
 	public BufferedImage getBaseImage() {
 		return Images.getSubImage(Entity.ENTITY_MAP, Entity.ENTITY_SIZE, this.animationState.getSpriteStart() + this.spriteMeta, mapY);
 	}
@@ -211,6 +247,10 @@ public abstract class BCEntity extends EntityLiving {
 	}
 	public void setColor(Color color) {
 		this.color = color;
+	}
+	
+	public BCEntity getOwner() {
+		return this;
 	}
 	
 	public static enum Type {

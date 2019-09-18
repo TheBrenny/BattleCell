@@ -18,6 +18,7 @@ public class BattleCellLevel extends Level {
 			super(MAP_LOCATION + ".main_map.bcmap", true, BCTile.getTile(BCTile.Type.STONE));
 		}
 	}
+	
 	public void expandMap(int x, int y) {
 	}
 }

@@ -6,8 +6,11 @@ import com.thebrenny.jumg.entities.Entity;
 import com.thebrenny.jumg.entities.ai.pathfinding.NodeList;
 import com.thebrenny.jumg.entities.ai.pathfinding.PathFinding;
 import com.thebrenny.jumg.entities.ai.states.DefaultStateMachine;
+import com.thebrenny.jumg.entities.messaging.Postman;
 
 import z5217759.brennfleck.jarod.battlecell.entities.BCEntity;
+import z5217759.brennfleck.jarod.battlecell.entities.messages.MessageAttack;
+import z5217759.brennfleck.jarod.battlecell.entities.messages.MessageTarget;
 
 public abstract class EntityStateMachine extends DefaultStateMachine<BCEntity, EntityState> {
 	public static final int PATH_LIFE = 30;
@@ -30,9 +33,10 @@ public abstract class EntityStateMachine extends DefaultStateMachine<BCEntity, E
 			e = entities.get(i);
 			if(e instanceof BCEntity) {
 				bcE = (BCEntity) e;
-				if(bcE.isAlive()) this.target = bcE;
+				if(bcE.isAlive()) setTarget(bcE);
 			}
 		}
+		if(this.getTarget() != null) Postman.getInstance().queueMessage(new MessageTarget(this.getOwner(), this.getTarget()));
 	}
 	public boolean hasTarget() {
 		return this.target != null;
@@ -56,6 +60,10 @@ public abstract class EntityStateMachine extends DefaultStateMachine<BCEntity, E
 		return pathToTarget;
 	}
 	
+	public void actuallyHurtTarget() {
+		Postman.getInstance().queueMessage(new MessageAttack(this.getOwner(), this.getTarget(), this.getOwner().getType().attackDamage));
+	}
+
 	public void tick() {
 		super.tick();
 		if(pathLifeLeft > 0) this.pathLifeLeft--;
