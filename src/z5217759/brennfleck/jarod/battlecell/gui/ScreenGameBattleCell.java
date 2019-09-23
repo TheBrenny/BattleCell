@@ -1,5 +1,8 @@
 package z5217759.brennfleck.jarod.battlecell.gui;
 
+import java.awt.geom.Point2D;
+import java.util.Random;
+
 import com.thebrenny.jumg.entities.EntityLiving;
 import com.thebrenny.jumg.entities.messaging.Message;
 import com.thebrenny.jumg.entities.messaging.MessageListener;
@@ -10,7 +13,6 @@ import com.thebrenny.jumg.input.KeyBindings;
 import com.thebrenny.jumg.util.MathUtil;
 import com.thebrenny.jumg.util.TimeUtil;
 
-import z5217759.brennfleck.jarod.battlecell.BattleCell;
 import z5217759.brennfleck.jarod.battlecell.entities.BCEntity;
 import z5217759.brennfleck.jarod.battlecell.entities.EntityArcher;
 import z5217759.brennfleck.jarod.battlecell.entities.EntityMagician;
@@ -25,20 +27,23 @@ public class ScreenGameBattleCell extends ScreenGame implements MessageListener<
 	
 	public ScreenGameBattleCell() { // TODO: You'll probably need to pass an array of players.
 		super(new BattleCellLevel(), new BCHudManager(Screen.getWidth(), Screen.getHeight()));
+		
+		int characters = 60;
+		
 		setCameraX(-Screen.getWidth() / 2);
 		setCameraY(-Screen.getHeight() / 2);
 		
 		// TODO: TESTING!
 		// this.player = allPlayers[0].setControlled(true);
-		this.player = new EntityMagician(BattleCell.getMainGame().getUsername(), 0, 0).setControlled(true);
+		this.player = newRandomEntity().setControlled(true);
 		this.level.addEntity(player);
-		this.level.addEntity(new EntityWarrior("WARRIOR", 10, -11));
-		this.level.addEntity(new EntityArcher("ARCHER", -10, -11));
+		for(int i = 1; i < characters; i++) this.level.addEntity(newRandomEntity());
 		this.setEntityToFollow(player);
 		this.moveCamera();
 	}
 	
 	public void moveCamera() {
+		if(KeyBindings.isPressed("cam_left") || KeyBindings.isPressed("cam_right") || KeyBindings.isPressed("cam_up") || KeyBindings.isPressed("cam_down")) this.entityToFollow = null;
 		if(this.entityToFollow != null) super.moveCamera();
 		else {
 			long camX = (long) (KeyBindings.isPressed("cam_left") ? -1 : KeyBindings.isPressed("cam_right") ? 1 : 0);
@@ -52,6 +57,29 @@ public class ScreenGameBattleCell extends ScreenGame implements MessageListener<
 			setCameraX(newX);
 			setCameraY(newY);
 		}
+		
+		if(KeyBindings.isPressed("cam_reset")) this.setEntityToFollow(player);
+	}
+	
+	public BCEntity newRandomEntity() {
+		BCEntity e = null;
+		
+		float x = MathUtil.random(getLevel().topLeftTile().x+1, getLevel().bottomRightTile().x-1);
+		float y = MathUtil.random(getLevel().topLeftTile().y+1, getLevel().bottomRightTile().y-1);
+		
+		Point2D.Float p = (Point2D.Float) getLevel().getNearestWalkableTile(x, y);
+		x = p.x;
+		y = p.y;
+		
+		int w = MathUtil.random(0, BCEntity.DEFENSE_MAX + 1);
+		int m = MathUtil.random(0, BCEntity.DEFENSE_MAX + 1 - w);
+		int a = BCEntity.DEFENSE_MAX + 1 - w - m;
+		int r = new Random().nextInt(3);
+		if(r == 0) e = new EntityWarrior("genUID:WAR", x, y);
+		else if(r == 1) e = new EntityMagician("genUID:MAG", x, y);
+		else if(r == 2) e = new EntityArcher("genUID:ARC", x, y);
+		
+		return e.setDefensiveTraits(w, m, a);
 	}
 	
 	public void update() {

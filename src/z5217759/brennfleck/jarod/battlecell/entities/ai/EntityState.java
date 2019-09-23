@@ -10,6 +10,7 @@ import com.thebrenny.jumg.entities.Entity;
 import com.thebrenny.jumg.entities.ai.pathfinding.Node;
 import com.thebrenny.jumg.entities.ai.pathfinding.NodeList;
 import com.thebrenny.jumg.entities.ai.states.State;
+import com.thebrenny.jumg.entities.messaging.Message;
 import com.thebrenny.jumg.gui.Screen;
 import com.thebrenny.jumg.level.tiles.Tile;
 import com.thebrenny.jumg.util.Angle;
@@ -41,7 +42,10 @@ public enum EntityState implements State<BCEntity> {
 					if(brain.getTargetDistance() >= MathUtil.distance(entity.getAnchoredTileLocation(), brain.getTarget().getAnchoredTileLocation())) brain.changeState(EntityState.ATTACK);
 					else entity.addMovementTo(path.getCurrentStep());
 				}
-			} else brain.changeState(EntityState.IDLE);
+			} else {
+				brain.setTarget(null); // without this, the character ends up spamming the Postman with a MessageTarget msg. :(
+				brain.changeState(EntityState.IDLE);
+			}
 		}
 		public void renderDebug(BCEntity entity, Graphics2D g2d, long camX, long camY, long camW, long camH) {
 			super.renderDebug(entity, g2d, camX, camY, camW, camH);
@@ -102,8 +106,11 @@ public enum EntityState implements State<BCEntity> {
 	public void enter(BCEntity entity) {
 		entity.setAnimationState(this.animationState);
 	}
-	public void exit(BCEntity entity) {
+	public boolean messageReceived(Message message) {
+		return false;
 	}
+	public void exit(BCEntity entity) {}
+
 	public void renderDebug(BCEntity entity, Graphics2D g2d, long camX, long camY, long camW, long camH) {
 		if(Screen.canCameraSeeEntity(entity)) {
 			g2d.setFont(new Font("Consolas", Font.PLAIN, 10));

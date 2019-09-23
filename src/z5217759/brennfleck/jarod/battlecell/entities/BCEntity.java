@@ -24,11 +24,12 @@ import z5217759.brennfleck.jarod.battlecell.entities.messages.BCMessage;
 import z5217759.brennfleck.jarod.battlecell.entities.messages.MessageAttack;
 
 public abstract class BCEntity extends EntityLiving implements MessageListener<BCEntity> {
+	public static final int DEFENSE_MAX = 7;
 	//TODO: Make these whichever is most used.
 	public static final int[] DEFAULT_IDLE_COUNTER_TRIGGERS = {20, 20};
 	public static final int[] DEFAULT_WALK_COUNTER_TRIGGERS = {20, 20};
 	public static final int[] DEFAULT_ATTACK_COUNTER_TRIGGERS = {60, 20};
-	public static final int[] DEFAULT_DEAD_COUNTER_TRIGGERS = {50};
+	public static final int[] DEFAULT_DEAD_COUNTER_TRIGGERS = {50, 0};
 	private static final int ATTACK_COUNTER_STAGE = 1; // the sprite animation which we actually attack on
 	
 	private final Type type;
@@ -46,6 +47,10 @@ public abstract class BCEntity extends EntityLiving implements MessageListener<B
 	protected final int healthCounterMax = 120;
 	protected final int healthFadeCounter = 15;
 	
+	protected int defenseWarrior;
+	protected int defenseMagician;
+	protected int defenseArcher;
+	
 	private boolean isControlled = false;
 	
 	public BCEntity(String name, float x, float y, Type type) {
@@ -59,13 +64,28 @@ public abstract class BCEntity extends EntityLiving implements MessageListener<B
 		this.setAnimationState(AnimationState.IDLE);
 		Postman.getInstance().registerListener(this);
 	}
-	
-	public boolean isControlled() {
-		return this.isControlled;
-	}
 	public BCEntity setControlled(boolean isControlled) {
 		this.isControlled = isControlled;
 		return this;
+	}
+	public BCEntity setDefensiveTraits(int warrior, int magician, int archer) {
+		return setDefenseWarrior(warrior).setDefenseMagician(defenseMagician).setDefenseArcher(defenseArcher);
+	}
+	public BCEntity setDefenseWarrior(int warrior) {
+		this.defenseWarrior = warrior;
+		return this;
+	}
+	public BCEntity setDefenseMagician(int magician) {
+		this.defenseMagician = magician;
+		return this;
+	}
+	public BCEntity setDefenseArcher(int archer) {
+		this.defenseArcher = archer;
+		return this;
+	}
+	
+	public boolean isControlled() {
+		return this.isControlled;
 	}
 	
 	public final void tick() {
@@ -85,10 +105,10 @@ public abstract class BCEntity extends EntityLiving implements MessageListener<B
 		if(msg instanceof BCMessage) {
 			switch(msg.getType()) {
 			case ATTACK:
-				hurt(((MessageAttack) msg).getDamage());
+				hurt((MessageAttack) msg);
 				break;
 			case TARGET:
-				// influence retaliation modifier.
+				// TODO: influence retaliation modifier. something like onTarget(tgt) => compute score for current target and tgt and attack the better score,
 				break;
 			default:
 				iHaveMail((BCMessage) msg);
@@ -116,6 +136,17 @@ public abstract class BCEntity extends EntityLiving implements MessageListener<B
 	}
 	
 	public abstract void attack(BCEntity target);
+	public float hurt(MessageAttack msg) {
+		float amount = msg.getDamage();
+		float dampW = MathUtil.map((float) (defenseWarrior / DEFENSE_MAX), 0, DEFENSE_MAX, 1, 0.1F);
+		float dampM = MathUtil.map((float) (defenseMagician / DEFENSE_MAX), 0, DEFENSE_MAX, 1, 0.1F);
+		float dampA = MathUtil.map((float) (defenseArcher / DEFENSE_MAX), 0, DEFENSE_MAX, 1, 0.1F);
+		
+		BCEntity sender = msg.getSender();
+		amount *= sender instanceof EntityWarrior ? dampW : sender instanceof EntityMagician ? dampM : sender instanceof EntityArcher ? dampA : 1;
+		
+		return super.hurt(amount);
+	}
 	public float heal(float amount) {
 		this.healthCounter = this.healthCounterMax;
 		return super.heal(amount);
@@ -128,6 +159,7 @@ public abstract class BCEntity extends EntityLiving implements MessageListener<B
 	public void updateCounters() {
 		if(!this.stopSpriteCounting) {
 			this.spriteCounter++;
+			if(new Random().nextInt(4) == 0) this.spriteCounter++;
 			// if the sprite meta is less than our triggers length, and we achieved the counter trigger.
 			if(this.spriteMeta < this.spriteCounterTriggers.length && this.spriteCounter >= this.spriteCounterTriggers[this.spriteMeta]) {
 				this.spriteCounter = 0;
@@ -256,7 +288,7 @@ public abstract class BCEntity extends EntityLiving implements MessageListener<B
 	public static enum Type {
 		WARRIOR(0, 0, 0.05F, 1, 1),
 		MAGICIAN(1, 2, 0.045F, 7, 0.7F),
-		ARCHER(2, 4, 0.055F, 13, 0.45F),
+		ARCHER(2, 4, 0.055F, 11.5F, 0.45F),
 		DUMMY(99, 6, 1, 0, 0);
 		
 		public final int id;

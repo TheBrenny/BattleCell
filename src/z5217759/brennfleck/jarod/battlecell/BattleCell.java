@@ -31,6 +31,7 @@ public class BattleCell extends MainGame {
 		super(args, "BattleCell", "z5217759.brennfleck.jarod.battlecell");
 		this.setUsername(System.getProperty("user.name", "Player" + new Random().nextLong()));
 		this.setCursor(this.getCursor());
+		this.engineTicks = 100;
 	}
 	
 	protected void loadImages() {
@@ -55,6 +56,7 @@ public class BattleCell extends MainGame {
 		KeyBindings.addKey("cam_down", KeyEvent.VK_S, false, true);
 		KeyBindings.addKey("cam_left", KeyEvent.VK_A, false, true);
 		KeyBindings.addKey("cam_right", KeyEvent.VK_D, false, true);
+		KeyBindings.addKey("cam_reset", KeyEvent.VK_SPACE, false, true);
 		KeyBindings.addKey("debug", KeyEvent.VK_P, true, true);
 		
 		// Just a click and let loose game?

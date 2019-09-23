@@ -25,15 +25,18 @@ public abstract class EntityStateMachine extends DefaultStateMachine<BCEntity, E
 	
 	public void setNextTarget() {
 		// TODO: add in the modifier values!
-		
-		ArrayList<Entity> entities = new ArrayList<Entity>(this.getOwner().getLevel().getNearbyEntities(this.getOwner().getTileX(), this.getOwner().getTileY(), 0, this.getOwner()));
+		ArrayList<Entity> entities = this.getOwner().getLevel().getNearbyEntities(this.getOwner().getTileX(), this.getOwner().getTileY(), 0, this.getOwner());
 		Entity e;
 		BCEntity bcE;
+		
 		for(int i = 0; i < entities.size(); i++) {
 			e = entities.get(i);
 			if(e instanceof BCEntity) {
 				bcE = (BCEntity) e;
-				if(bcE.isAlive()) setTarget(bcE);
+				if(bcE.isAlive()) {
+					setTarget(bcE);
+					break;
+				}
 			}
 		}
 		if(this.getTarget() != null) Postman.getInstance().queueMessage(new MessageTarget(this.getOwner(), this.getTarget()));
@@ -51,7 +54,7 @@ public abstract class EntityStateMachine extends DefaultStateMachine<BCEntity, E
 	public float getTargetDistanceSqrd() {
 		return getTargetDistance() * getTargetDistance();
 	}
-	public synchronized NodeList getPathToTarget() {
+	public NodeList getPathToTarget() {
 		if(pathToTarget == null) {
 			PathFinding pf = new PathFinding(this.getOwner().getAnchoredTileLocation(), this.getTarget().getAnchoredTileLocation(), this.getOwner().getLevel());
 			this.pathToTarget = pf.search(true);

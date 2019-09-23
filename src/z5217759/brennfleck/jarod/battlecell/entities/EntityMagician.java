@@ -5,8 +5,8 @@ import z5217759.brennfleck.jarod.battlecell.entities.ai.MagicianStateMachine;
 public class EntityMagician extends BCEntity {
     public static final int[] IDLE_COUNTER_TRIGGERS = DEFAULT_IDLE_COUNTER_TRIGGERS;
     public static final int[] WALK_COUNTER_TRIGGERS = DEFAULT_WALK_COUNTER_TRIGGERS;
-    public static final int[] ATTACK_COUNTER_TRIGGERS = {60, 80};
-    public static final int[] DEAD_COUNTER_TRIGGERS = {50};
+    public static final int[] ATTACK_COUNTER_TRIGGERS = DEFAULT_ATTACK_COUNTER_TRIGGERS;
+    public static final int[] DEAD_COUNTER_TRIGGERS = {70, 0};
     
     public EntityMagician(String name, float x, float y) {
         super(name, x, y, BCEntity.Type.MAGICIAN);
