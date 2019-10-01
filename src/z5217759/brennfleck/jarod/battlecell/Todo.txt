@@ -1,10 +1,8 @@
 TODO:
 
- * Entity Messaging system!
+ * **Networking**
+   - **The game has been disconnected from running. Once networking is fixed, i then need to attach it to the Lobby Screen!**
 
- - Networking
-   - Build Packet
- 
  - Lobby Screen
    - Join Game
    - Create Server

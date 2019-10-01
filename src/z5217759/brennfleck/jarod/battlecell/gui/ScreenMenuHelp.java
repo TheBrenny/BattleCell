@@ -20,7 +20,7 @@ public class ScreenMenuHelp extends ScreenMenu {
 		int width = BattleCell.getMainGame().getDisplay().getWidth();
 		int height = BattleCell.getMainGame().getDisplay().getHeight();
 		
-		addComponent(new GuiLabel(width / 2, height / 12 * 2, ScreenMenuHelp.getHelpContent()).allign("centre", "top").adjustFont(24F).setColor(Color.WHITE));
+		addComponent(new GuiLabel(width / 2, height / 12 * 2, ScreenMenuHelp.getHelpContent()).align("centre", "top").adjustFont(24F).setColor(Color.WHITE));
 		addComponent(new GuiButton(width / 2 - 100, height / 12 * 10, 200, 50, "Back", new Runnable() {
 			public void run() {
 				Screen.screenBack();

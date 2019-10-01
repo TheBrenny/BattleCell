@@ -6,6 +6,7 @@ import com.thebrenny.jumg.gui.Screen;
 import com.thebrenny.jumg.gui.ScreenMenu;
 import com.thebrenny.jumg.gui.components.GuiButton;
 import com.thebrenny.jumg.gui.components.GuiImageLabel;
+import com.thebrenny.jumg.gui.components.GuiLabel;
 import com.thebrenny.jumg.util.Images;
 import com.thebrenny.jumg.util.Logger;
 
@@ -19,10 +20,11 @@ public class ScreenMenuMain extends ScreenMenu {
 		int width = BattleCell.getMainGame().getDisplay().getWidth();
 		int height = BattleCell.getMainGame().getDisplay().getHeight();
 		
-		addComponent(new GuiImageLabel(width / 2, height / 12 * 3, Images.getImage("title")));
+		addComponent(new GuiImageLabel(width / 2, height / 12 * 3, Images.getImage("title")).align(GuiLabel.ALIGN_CENTRE));
 		addComponent(new GuiButton(width / 2 - 125, height / 12 * 6, 250, 50, "Start Game!", new Runnable() {
 			public void run() {
-				Screen.screenForward(new ScreenGameBattleCell());
+				//Screen.screenForward(new ScreenGameBattleCell());
+				Screen.screenForward(new ScreenMenuNewGame());
 				// Screen forward to lobby
 				// Then to battle (with prepare for battle hud)
 				// Then HUD disappears when all players ready.

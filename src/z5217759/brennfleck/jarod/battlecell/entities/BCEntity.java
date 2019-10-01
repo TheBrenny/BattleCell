@@ -24,15 +24,16 @@ import z5217759.brennfleck.jarod.battlecell.entities.messages.BCMessage;
 import z5217759.brennfleck.jarod.battlecell.entities.messages.MessageAttack;
 
 public abstract class BCEntity extends EntityLiving implements MessageListener<BCEntity> {
+	private static final Random GLOBAL_RANDOM = new Random();
 	public static final int DEFENSE_MAX = 7;
 	//TODO: Make these whichever is most used.
-	public static final int[] DEFAULT_IDLE_COUNTER_TRIGGERS = {20, 20};
-	public static final int[] DEFAULT_WALK_COUNTER_TRIGGERS = {20, 20};
+	public static final int[] DEFAULT_IDLE_COUNTER_TRIGGERS = {25, 25};
+	public static final int[] DEFAULT_WALK_COUNTER_TRIGGERS = {25, 25};
 	public static final int[] DEFAULT_ATTACK_COUNTER_TRIGGERS = {60, 20};
 	public static final int[] DEFAULT_DEAD_COUNTER_TRIGGERS = {50, 0};
 	private static final int ATTACK_COUNTER_STAGE = 1; // the sprite animation which we actually attack on
 	
-	private final Type type;
+	protected Type type;
 	
 	protected Color color;
 	protected AnimationState animationState;
@@ -159,7 +160,7 @@ public abstract class BCEntity extends EntityLiving implements MessageListener<B
 	public void updateCounters() {
 		if(!this.stopSpriteCounting) {
 			this.spriteCounter++;
-			if(new Random().nextInt(4) == 0) this.spriteCounter++;
+			if(GLOBAL_RANDOM.nextInt(4) == 0) this.spriteCounter++;
 			// if the sprite meta is less than our triggers length, and we achieved the counter trigger.
 			if(this.spriteMeta < this.spriteCounterTriggers.length && this.spriteCounter >= this.spriteCounterTriggers[this.spriteMeta]) {
 				this.spriteCounter = 0;
@@ -183,7 +184,7 @@ public abstract class BCEntity extends EntityLiving implements MessageListener<B
 	 *        - Which stage was triggered. 0 is reset.
 	 */
 	public void counterEvent(int counterStage) {
-		if(this.getBrain().getState() == EntityState.ATTACK && counterStage == ATTACK_COUNTER_STAGE) this.attack(this.getBrain().getTarget());
+		if(this.getBrain() != null && this.getBrain().getState() == EntityState.ATTACK && counterStage == ATTACK_COUNTER_STAGE) this.attack(this.getBrain().getTarget());
 	}
 	public int getSpriteMeta() {
 		return spriteMeta;
@@ -256,7 +257,8 @@ public abstract class BCEntity extends EntityLiving implements MessageListener<B
 	public BufferedImage getRawImage() {
 		if(this.image == null) {
 			BufferedImage base = getBaseImage();
-			BufferedImage over = Images.recolour(getOverlayImage(), this.color);
+			BufferedImage over = null;
+			if(this.getType() != Type.DUMMY) over = Images.recolour(getOverlayImage(), this.color);
 			this.image = new BufferedImage(base.getWidth(), base.getHeight(), BufferedImage.TYPE_INT_ARGB);
 			Graphics2D g2d = this.image.createGraphics();
 			if(base != null) g2d.drawImage(base, 0, 0, null);
@@ -278,7 +280,7 @@ public abstract class BCEntity extends EntityLiving implements MessageListener<B
 		return this.color;
 	}
 	public void setColor(Color color) {
-		this.color = color;
+		this.color = new Color(color.getRed(), color.getGreen(), color.getBlue(), 100);
 	}
 	
 	public BCEntity getOwner() {
@@ -303,6 +305,27 @@ public abstract class BCEntity extends EntityLiving implements MessageListener<B
 			this.speed = speed;
 			this.attackDistance = attackDistance;
 			this.attackDamage = attackDamage;
+		}
+		
+		public static Type getTypeByID(int id) {
+			for(Type t : Type.values()) {
+				if(t.id == id) return t;
+			}
+			return null;
+		}
+		
+		public String toString() {
+			switch(this) {
+			case WARRIOR:
+				return "Warrior";
+			case MAGICIAN:
+				return "Magician";
+			case ARCHER:
+				return "Archer";
+			case DUMMY:
+				return "Dummy";
+			}
+			return "OH OH NULL NULL";
 		}
 	}
 	public static enum AnimationState {
