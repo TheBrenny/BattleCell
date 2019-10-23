@@ -9,7 +9,7 @@
     <br />
     <a href="https://github.com/TheBrenny/JUMG-3.0"><strong><em>Powered by JUMG</em></strong></a>
 	<br />
-	Status: <em>Still cooking... Needs more bacon.<em>
+	Status: <em>Still cooking... A couple of eggs, maybe? 🍳.</em>
     <br />
     <br />
     <a href="https://github.com/TheBrenny/BattleCell/releases">Releases</a>
