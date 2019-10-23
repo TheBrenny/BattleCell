@@ -73,7 +73,6 @@ public class BattleCell extends MainGame {
 		return true;
 	}
 	
-	@Override
 	public void update() {
 		super.update();
 		if(KeyBindings.isPressed("debug")) setDebug(true);

@@ -3,6 +3,7 @@ package z5217759.brennfleck.jarod.battlecell.gui;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
+import java.util.ArrayList;
 
 import com.thebrenny.jumg.entities.messaging.Postman;
 import com.thebrenny.jumg.gui.Screen;
@@ -13,6 +14,7 @@ import com.thebrenny.jumg.gui.components.GuiLabel;
 import com.thebrenny.jumg.gui.components.GuiList;
 import com.thebrenny.jumg.gui.components.GuiNumberSpinner;
 import com.thebrenny.jumg.util.MathUtil;
+import com.thebrenny.jumg.util.TimeUtil;
 
 import z5217759.brennfleck.jarod.battlecell.BattleCell;
 import z5217759.brennfleck.jarod.battlecell.entities.BCEntity;
@@ -22,9 +24,13 @@ import z5217759.brennfleck.jarod.battlecell.gui.components.GuiCharacterPreview;
 public class ScreenMenuLobby extends ScreenMenu {
 	private boolean isHost = false;
 	private EntityDummy entity;
+	private EntityDummy entityM; // TODO: when we spin between three
+	private EntityDummy entityA;
+	private ArrayList<NameToDeleteEntry> namesToDelete;
 	
 	private GuiLabel characterLabel;
 	private GuiCharacterPreview charPreview;
+	private GuiList lobbyNames;
 	private GuiLabel defRemainLbl;
 	private GuiNumberSpinner warDefSpinner;
 	private GuiNumberSpinner magDefSpinner;
@@ -33,14 +39,15 @@ public class ScreenMenuLobby extends ScreenMenu {
 	private GuiNumberSpinner greenSpinner;
 	private GuiNumberSpinner blueSpinner;
 	
+	private Color charColor;
 	private int selectedCharacter = 0;
 	private int defPointRemain = BCEntity.DEFENSE_MAX;
 	private int defenseWarrior = 0;
 	private int defenseMagician = 0;
 	private int defenseArcher = 0;
 	
-	public ScreenMenuLobby(int gameData) {
-		//this game data becomes passed game data.
+	public ScreenMenuLobby(String ... names) {
+		// this game data becomes passed game data.
 		
 		// bg should eventually become a big pic of the game map which moves according to the mouse pos.
 		
@@ -61,6 +68,9 @@ public class ScreenMenuLobby extends ScreenMenu {
 		
 		pnl = new ComponentPanel(width / 3 * 2, 0, width / 3, height - 200);
 		addLobbyPanel(pnl, 20);
+		namesToDelete = new ArrayList<NameToDeleteEntry>();
+		
+		for(String name : names) addPlayer(name);
 		
 		pnl = new ComponentPanel(width / 3 * 2, height, width / 3, -200);
 		addGameButtonsPanel(pnl);
@@ -121,7 +131,7 @@ public class ScreenMenuLobby extends ScreenMenu {
 	}
 	private final void addLobbyPanel(ComponentPanel pnl, int playerCount) {
 		// Lobby is a GuiList w/ coloured names for readiness - could become list selector w/ buttons?
-		pnl.addComponent(new GuiList(0, 0, (float) pnl.getWidth(), (float) pnl.getHeight(), playerCount));
+		pnl.addComponent(lobbyNames = new GuiList(0, 0, (float) pnl.getWidth(), (float) pnl.getHeight(), playerCount));
 		pnl.appendToComponents(this.components);
 	}
 	private final void addGameButtonsPanel(ComponentPanel pnl) {
@@ -162,7 +172,7 @@ public class ScreenMenuLobby extends ScreenMenu {
 		// change colour according to RGB spinners,
 		Color c = entity.getColor();
 		if(c.getRed() != redSpinner.getNumber() || c.getGreen() != greenSpinner.getNumber() || c.getBlue() != blueSpinner.getNumber()) {
-			entity.setColor(new Color(redSpinner.getNumber(), greenSpinner.getNumber(), blueSpinner.getNumber()));
+			entity.setColor(charColor = new Color(redSpinner.getNumber(), greenSpinner.getNumber(), blueSpinner.getNumber()));
 		}
 		
 		defPointRemain = BCEntity.DEFENSE_MAX - warDefSpinner.getNumber() - magDefSpinner.getNumber() - arcDefSpinner.getNumber();
@@ -170,6 +180,15 @@ public class ScreenMenuLobby extends ScreenMenu {
 		magDefSpinner.setMinMax(0, defPointRemain + magDefSpinner.getNumber());
 		arcDefSpinner.setMinMax(0, defPointRemain + arcDefSpinner.getNumber());
 		defRemainLbl.setString(0, "Defense Points Remaining: " + defPointRemain);
+		
+		NameToDeleteEntry[] ntd = namesToDelete.toArray(new NameToDeleteEntry[namesToDelete.size()]);
+		for(NameToDeleteEntry ntde : ntd) {
+			if(TimeUtil.getElapsed(ntde.getTimestamp()) >= NameToDeleteEntry.TIME_TO_LIVE) removePlayerEntry(ntde);
+			else {
+				int i = lobbyNames.indexOf(ntde.getName());
+				if(i != -1) lobbyNames.getItem(i).setString(0, ntde.getName() + " disconnected: " + ntde.getReason());
+			}
+		}
 	}
 	public void render(Graphics2D g2d) {
 	}
@@ -180,7 +199,41 @@ public class ScreenMenuLobby extends ScreenMenu {
 		g2d.fillRect(0, 0, width, height);
 	}
 	
+	public void addPlayer(String name) {
+		lobbyNames.addToList(name);
+	}
+	public void removePlayer(String name, String reason) {
+		namesToDelete.add(new NameToDeleteEntry(name, reason, TimeUtil.getEpoch()));
+	}
+	private void removePlayerEntry(NameToDeleteEntry ntde) {
+		namesToDelete.remove(ntde);
+		lobbyNames.removeFromList(ntde.getName());
+	}
+	
 	public boolean isHost() {
 		return isHost;
+	}
+	
+	private class NameToDeleteEntry {
+		public static final long TIME_TO_LIVE = 3000;
+		private String name;
+		private String reason;
+		private long timestamp;
+		
+		public NameToDeleteEntry(String name, String reason, long timestamp) {
+			this.name = name;
+			this.reason = reason;
+			this.timestamp = timestamp;
+		}
+		
+		public String getName() {
+			return name;
+		}
+		public String getReason() {
+			return reason;
+		}
+		public long getTimestamp() {
+			return timestamp;
+		}
 	}
 }
