@@ -28,7 +28,6 @@ import z5217759.brennfleck.jarod.battlecell.level.tile.BCTile;
  *
  */
 public class BattleCell extends MainGame {
-	private String username;
 	
 	public BattleCell(String[] args) {
 		super(args, "BattleCell", "z5217759.brennfleck.jarod.battlecell");
@@ -82,14 +81,6 @@ public class BattleCell extends MainGame {
 		super.update();
 		if(KeyBindings.isPressed("debug")) setDebug(true);
 		else setDebug(false);
-	}
-	
-	public String getUsername() {
-		return this.username;
-	}
-	
-	public void setUsername(String username) {
-		this.username = username;
 	}
 	
 	public static BattleCell getMainGame() {
