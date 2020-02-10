@@ -12,7 +12,11 @@ import com.thebrenny.jumg.gui.components.ComponentPanel;
 import com.thebrenny.jumg.gui.components.GuiButton;
 import com.thebrenny.jumg.gui.components.GuiLabel;
 import com.thebrenny.jumg.gui.components.GuiList;
+import com.thebrenny.jumg.gui.components.GuiList.GuiListItem;
 import com.thebrenny.jumg.gui.components.GuiNumberSpinner;
+import com.thebrenny.jumg.net.GameClient;
+import com.thebrenny.jumg.net.GameServer;
+import com.thebrenny.jumg.util.Logger;
 import com.thebrenny.jumg.util.MathUtil;
 import com.thebrenny.jumg.util.TimeUtil;
 
@@ -20,12 +24,16 @@ import z5217759.brennfleck.jarod.battlecell.BattleCell;
 import z5217759.brennfleck.jarod.battlecell.entities.BCEntity;
 import z5217759.brennfleck.jarod.battlecell.entities.EntityDummy;
 import z5217759.brennfleck.jarod.battlecell.gui.components.GuiCharacterPreview;
+import z5217759.brennfleck.jarod.battlecell.net.packets.Packet001Disconnect;
+import z5217759.brennfleck.jarod.battlecell.net.packets.Packet002Ready;
 
 public class ScreenMenuLobby extends ScreenMenu {
 	private boolean isHost = false;
+	private boolean isReady = false;
+	private String hostName = "";
 	private EntityDummy entity;
-	private EntityDummy entityM; // TODO: when we spin between three
-	private EntityDummy entityA;
+	private EntityDummy entityTwo; // TODO: when we spin between three
+	private EntityDummy entityThree;
 	private ArrayList<NameToDeleteEntry> namesToDelete;
 	
 	private GuiLabel characterLabel;
@@ -39,14 +47,15 @@ public class ScreenMenuLobby extends ScreenMenu {
 	private GuiNumberSpinner greenSpinner;
 	private GuiNumberSpinner blueSpinner;
 	
-	private Color charColor;
-	private int selectedCharacter = 0;
+	private Color charColor = Color.BLACK;
+	private byte selectedCharacter = 0;
 	private int defPointRemain = BCEntity.DEFENSE_MAX;
 	private int defenseWarrior = 0;
 	private int defenseMagician = 0;
 	private int defenseArcher = 0;
 	
-	public ScreenMenuLobby(String ... names) {
+	public ScreenMenuLobby(String host, String ... names) {
+		this.hostName = host;
 		// this game data becomes passed game data.
 		
 		// bg should eventually become a big pic of the game map which moves according to the mouse pos.
@@ -86,13 +95,13 @@ public class ScreenMenuLobby extends ScreenMenu {
 		// There's a lot of bs magic numbers here. but it works. so play with them if you'd like.
 		pnl.addComponent(new GuiButton((float) pnl.getWidth() / 5 - 20, (float) pnl.getHeight() / 4 * 1 - 22, 40, 40, "←", new Runnable() {
 			public void run() {
-				ScreenMenuLobby.this.selectedCharacter = MathUtil.wrap(0, ScreenMenuLobby.this.selectedCharacter - 1, 3);
+				ScreenMenuLobby.this.selectedCharacter = (byte) MathUtil.wrap(0, ScreenMenuLobby.this.selectedCharacter - 1, 3);
 				updateCharPreview();
 			}
 		}));
 		pnl.addComponent(new GuiButton((float) pnl.getWidth() / 5 * 4 - 20, (float) pnl.getHeight() / 4 * 1 - 22, 40, 40, "→", new Runnable() {
 			public void run() {
-				ScreenMenuLobby.this.selectedCharacter = MathUtil.wrap(0, ScreenMenuLobby.this.selectedCharacter + 1, 3);
+				ScreenMenuLobby.this.selectedCharacter = (byte) MathUtil.wrap(0, ScreenMenuLobby.this.selectedCharacter + 1, 3);
 				updateCharPreview();
 			}
 		}));
@@ -141,19 +150,27 @@ public class ScreenMenuLobby extends ScreenMenu {
 			public void run() {
 				// TODO: Show invite overlay.
 			}
-		}));
+		}).setEnabled(false));
 		pnl.addComponent(new GuiButton((float) pnl.getWidth() / 2 - 100, (float) pnl.getHeight() / 4 * 2 - 22, 200, 45, "Ready To BATTLE", new Runnable() {
 			public void run() {
 				// TODO: Start the game.
 				// Send Ready packet to the server
 				// once all players are ready, initiate countdown in the middle of the screen.
 				// once countdown complete, set screen to screengame, and wait for server instructions.
+				readyingUpChangesButtons();
+				GameClient gc = GameClient.getInstance();
+
+				if(gc != null) {
+					Packet002Ready packet = new Packet002Ready(BattleCell.getMainGame().getUsername(), isReady, selectedCharacter, charColor.getRGB(), defenseWarrior, defenseMagician, defenseArcher);
+				} else {
+					Logger.log("WHAT THE HECK!? YOU SHOULDN'T BE HERE WITHOUT A GAME CLIENT INSTANCE!");
+				}
 			}
 		}));
 		pnl.addComponent(new GuiButton((float) pnl.getWidth() / 2 - 75, (float) pnl.getHeight() / 4 * 3 - 22, 150, 45, "Back", new Runnable() {
 			public void run() {
 				// confirmation overlay
-				Screen.screenBack();
+				exitLobby(null);
 			}
 		}));
 		pnl.appendToComponents(this.components);
@@ -162,7 +179,11 @@ public class ScreenMenuLobby extends ScreenMenu {
 		this.isHost = isHost;
 		return this;
 	}
-	
+	public void readyingUpChangesButtons() {
+		isReady = !isReady;
+
+	}
+
 	public void updateCharPreview() {
 		charPreview.changeCharacter(selectedCharacter);
 		characterLabel.setString(0, entity.getType().toString());
@@ -170,26 +191,30 @@ public class ScreenMenuLobby extends ScreenMenu {
 	
 	public void tick() {
 		// change colour according to RGB spinners,
-		Color c = entity.getColor();
-		if(c.getRed() != redSpinner.getNumber() || c.getGreen() != greenSpinner.getNumber() || c.getBlue() != blueSpinner.getNumber()) {
+		if( //@formatter:off
+			charColor.getRed() != redSpinner.getNumber() ||
+			charColor.getGreen() != greenSpinner.getNumber() ||
+			charColor.getBlue() != blueSpinner.getNumber()
+			//@formatter:on
+		) {
 			entity.setColor(charColor = new Color(redSpinner.getNumber(), greenSpinner.getNumber(), blueSpinner.getNumber()));
 		}
 		
+		int defPointOld = defPointRemain;
 		defPointRemain = BCEntity.DEFENSE_MAX - warDefSpinner.getNumber() - magDefSpinner.getNumber() - arcDefSpinner.getNumber();
-		warDefSpinner.setMinMax(0, defPointRemain + warDefSpinner.getNumber());
-		magDefSpinner.setMinMax(0, defPointRemain + magDefSpinner.getNumber());
-		arcDefSpinner.setMinMax(0, defPointRemain + arcDefSpinner.getNumber());
-		defRemainLbl.setString(0, "Defense Points Remaining: " + defPointRemain);
+		if(defPointRemain != defPointOld) {
+			defRemainLbl.setString(0, "Defense Points Remaining: " + defPointRemain);
+			warDefSpinner.setMinMax(0, defPointRemain + warDefSpinner.getNumber());
+			magDefSpinner.setMinMax(0, defPointRemain + magDefSpinner.getNumber());
+			arcDefSpinner.setMinMax(0, defPointRemain + arcDefSpinner.getNumber());
+		}
 		
 		NameToDeleteEntry[] ntd = namesToDelete.toArray(new NameToDeleteEntry[namesToDelete.size()]);
 		for(NameToDeleteEntry ntde : ntd) {
-			if(TimeUtil.getElapsed(ntde.getTimestamp()) >= NameToDeleteEntry.TIME_TO_LIVE) removePlayerEntry(ntde);
-			else {
-				int i = lobbyNames.indexOf(ntde.getName());
-				if(i != -1) lobbyNames.getItem(i).setString(0, ntde.getName() + " disconnected: " + ntde.getReason());
-			}
+			if(ntde.hasExpired()) removePlayerEntry(ntde);
 		}
 	}
+	
 	public void render(Graphics2D g2d) {
 	}
 	public void renderBackground(Graphics2D g2d) {
@@ -203,29 +228,60 @@ public class ScreenMenuLobby extends ScreenMenu {
 		lobbyNames.addToList(name);
 	}
 	public void removePlayer(String name, String reason) {
-		namesToDelete.add(new NameToDeleteEntry(name, reason, TimeUtil.getEpoch()));
+		if(name != null && name.equals(hostName)) {
+			exitLobby("Server closed");
+		} else {
+			int i = lobbyNames.indexOf(name);
+			if(i != -1) {
+				GuiListItem item = lobbyNames.getItem(i);
+				namesToDelete.add(new NameToDeleteEntry(item, name, reason, TimeUtil.getEpoch()));
+			}
+		}
 	}
 	private void removePlayerEntry(NameToDeleteEntry ntde) {
 		namesToDelete.remove(ntde);
-		lobbyNames.removeFromList(ntde.getName());
+		lobbyNames.removeItem(ntde.getItem());
 	}
 	
 	public boolean isHost() {
 		return isHost;
 	}
 	
+	public void exitLobby(String reason) {
+		GameClient gc = GameClient.getInstance();
+		GameServer gs = GameServer.getInstance();
+		
+		if(gs != null) {
+			gs.disconnectAllConnections();
+			gs.stop();
+		}
+		if(gc != null) {
+			if(gs == null) gc.sendPacket(new Packet001Disconnect(BattleCell.getMainGame().getUsername(), reason));
+			gc.stop();
+		}
+		
+		Screen.screenBack();
+		if(reason != null) Screen.screenForward(new ScreenMenuServerConnectionLost(reason));
+	}
+	
 	private class NameToDeleteEntry {
 		public static final long TIME_TO_LIVE = 3000;
+		private GuiListItem item;
 		private String name;
 		private String reason;
 		private long timestamp;
 		
-		public NameToDeleteEntry(String name, String reason, long timestamp) {
+		public NameToDeleteEntry(GuiListItem item, String name, String reason, long timestamp) {
+			this.item = item;
+			this.item.setString(0, name + " disconnected" + (reason != null ? ": " + reason : ""));
 			this.name = name;
 			this.reason = reason;
 			this.timestamp = timestamp;
 		}
 		
+		public GuiListItem getItem() {
+			return item;
+		}
 		public String getName() {
 			return name;
 		}
@@ -234,6 +290,10 @@ public class ScreenMenuLobby extends ScreenMenu {
 		}
 		public long getTimestamp() {
 			return timestamp;
+		}
+		
+		public boolean hasExpired() {
+			return TimeUtil.getEpoch() - timestamp >= TIME_TO_LIVE;
 		}
 	}
 }

@@ -85,6 +85,16 @@ public abstract class BCEntity extends EntityLiving implements MessageListener<B
 		return this;
 	}
 	
+	public int getWarriorDefense() {
+		return this.defenseWarrior;
+	}
+	public int getMagicianDefense() {
+		return this.defenseMagician;
+	}
+	public int getArcherDefense() {
+		return this.defenseArcher;
+	}
+	
 	public boolean isControlled() {
 		return this.isControlled;
 	}

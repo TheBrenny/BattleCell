@@ -7,14 +7,13 @@ import com.thebrenny.jumg.gui.Screen;
 import com.thebrenny.jumg.gui.ScreenMenu;
 import com.thebrenny.jumg.gui.components.GuiButton;
 import com.thebrenny.jumg.gui.components.GuiLabel;
-import com.thebrenny.jumg.util.Images;
 import com.thebrenny.jumg.util.Logger;
 
 import z5217759.brennfleck.jarod.battlecell.BattleCell;
 
 public class ScreenMenuHelp extends ScreenMenu {
 	public ScreenMenuHelp() {
-		super(Images.getImage("background"));
+		//super(Images.getImage("background"));
 		Logger.startSection("menuHelpInit", "Setting up the help menu screen.");
 		
 		int width = BattleCell.getMainGame().getDisplay().getWidth();

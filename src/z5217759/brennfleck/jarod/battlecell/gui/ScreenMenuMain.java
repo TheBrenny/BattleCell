@@ -14,7 +14,7 @@ import z5217759.brennfleck.jarod.battlecell.BattleCell;
 
 public class ScreenMenuMain extends ScreenMenu {
 	public ScreenMenuMain() {
-		super(Images.getImage("background"));
+		//super(Images.getImage("background"));
 		Logger.startSection("menuMainInit", "Setting up the main menu screen.");
 		
 		int width = BattleCell.getMainGame().getDisplay().getWidth();
@@ -47,6 +47,8 @@ public class ScreenMenuMain extends ScreenMenu {
 		Logger.endSection("menuMainInit", "Main menu screen has been set up.");
 	}
 	
-	public void tick() {}
-	public void render(Graphics2D g2d) {}
+	public void tick() {
+	}
+	public void render(Graphics2D g2d) {
+	}
 }

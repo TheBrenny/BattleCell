@@ -1,5 +1,6 @@
 package z5217759.brennfleck.jarod.battlecell;
 
+import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Point;
 import java.awt.Toolkit;
@@ -8,6 +9,8 @@ import java.awt.event.MouseEvent;
 import java.util.Random;
 
 import com.thebrenny.jumg.MainGame;
+import com.thebrenny.jumg.gui.ScreenMenu;
+import com.thebrenny.jumg.gui.components.GuiLabel;
 import com.thebrenny.jumg.input.KeyBindings;
 import com.thebrenny.jumg.level.tiles.Tile;
 import com.thebrenny.jumg.util.Images;
@@ -70,6 +73,8 @@ public class BattleCell extends MainGame {
 	public boolean initialise() {
 		Logger.log("Setting screen to main menu.");
 		getScreenManager().setScreen(new ScreenMenuMain());
+		GuiLabel.setDefaultColor(Color.RED);
+		ScreenMenu.setDefaultBackgroundImage(Images.getImage("background"), ScreenMenu.DRAW_IMAGE_STRETCH | ScreenMenu.DRAW_IMAGE_HORI_CENTER | ScreenMenu.DRAW_IMAGE_VERTI_CENTER);
 		return true;
 	}
 	
