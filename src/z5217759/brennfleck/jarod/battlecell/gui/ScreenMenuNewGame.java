@@ -8,7 +8,6 @@ import com.thebrenny.jumg.gui.components.GuiButton;
 import com.thebrenny.jumg.gui.components.GuiLabel;
 import com.thebrenny.jumg.gui.components.GuiTextBox;
 import com.thebrenny.jumg.net.Packet;
-import com.thebrenny.jumg.util.Images;
 import com.thebrenny.jumg.util.Logger;
 
 import z5217759.brennfleck.jarod.battlecell.BattleCell;
@@ -24,8 +23,7 @@ public class ScreenMenuNewGame extends ScreenMenu {
 	private GuiButton joinBtn;
 	
 	public ScreenMenuNewGame() {
-		super(Images.getImage("background"));
-		// Will change to Images.getImage("game_background");
+		//super(Images.getImage("background"));
 		
 		int width = BattleCell.getMainGame().getDisplay().getWidth();
 		int height = BattleCell.getMainGame().getDisplay().getHeight();
@@ -34,10 +32,16 @@ public class ScreenMenuNewGame extends ScreenMenu {
 		
 		addComponent(new GuiButton(width / 2 - 125, height / 12 * 7, 250, 50, "Create New Game", new Runnable() {
 			public void run() {
-				// TODO: Next up!
+				// TODO: CURRENT!
 				// Create a Game Server and open up the game lobby (passing the server object as a param)
-				BCServer server = (BCServer) new BCServer(BattleCell.getMainGame().getUsername()).setConnectionPacket(PacketType.CONNECT.id);
+				BCServer server = (BCServer) new BCServer(BattleCell.getMainGame().getUsername()).getInstance().setConnectionPacket(PacketType.CONNECT.id);
 				server.start();
+				try {
+					Thread.sleep(500); // Don't win the race against the server start up!
+				} catch(Exception e) {
+					Logger.log("Oops. The thread woke up unexpectedly!");
+					e.printStackTrace();
+				}
 				joinServerMethod(server.getLANSrcAddress() + ":" + server.getSrcPort());
 				//GameServer.ServerInfo info = server.getServerInfo(); // This will change to the actual game server object!
 				//Screen.screenForward(new ScreenMenuLobby(BattleCell.getMainGame().getUsername()).setHost(true));
@@ -46,7 +50,7 @@ public class ScreenMenuNewGame extends ScreenMenu {
 		addComponent(serverBox = new GuiTextBox(width / 2 - 125, height / 12 * 8, 190, 50, "IP Address"));
 		addComponent(joinBtn = new GuiButton(width / 2 + 75, height / 12 * 8, 50, 50, "Join", new Runnable() {
 			public void run() {
-				joinServerMethod(null);
+				joinServerMethod(serverBox.getString());
 			}
 		}));
 		addComponent(new GuiButton(width / 2 - 125, height / 12 * 9, 250, 50, "Open to Invites", new Runnable() {
@@ -85,33 +89,33 @@ public class ScreenMenuNewGame extends ScreenMenu {
 			new Thread(new Runnable() {
 				public void run() {
 					try {
-						Thread.sleep(500); // Don't win the race!
-
-						if(client.testConnection()) { // Thread Blocking!
+						if(client.testConnection2()) { // Thread Blocking!
 							// If the server exists we want to shoot the connection request packet and join the game!
 							String username = BattleCell.getMainGame().getUsername();
 							String[] connectedUsers = null;
+							String host = "";
 							
-							// Send 000Connect
+							// Send 000Connect - this allows us to access info on the server - sort of like the auth high five
 							Packet p = new Packet000Connect(username);
 							client.sendPacket(p);
 							p = new Packet000Connect(client.grabPacket(p.generatePacketHeader()).getData());
 							if(!((Packet000Connect) p).getName().startsWith(username)) throw new Exception("The username from the response [" + ((Packet000Connect) p).getName() + "] didn't match your name [" + username + "]! Could've been a racing issue?");
-							// TODO: the above line shouldn't be an if - what if we end up in a race situation and the second packet we receive is our connection packet?
+							// TODO: Grab packet should be modified to use a full predicate, rather than testing for just a packet header.
 							username = ((Packet000Connect) p).getName();
 							BattleCell.getMainGame().setUsername(username);
 							
 							// Send 1001InfoRequest
-							p = new Packet1001InfoRequest(new String[] {Packet1002InfoResponse.CONNECTED_USERS});
+							p = new Packet1001InfoRequest(Packet1002InfoResponse.CONNECTED_USERS, Packet1002InfoResponse.SERVER_HOST);
 							client.sendPacket(p);
 							
 							// Recv 1002InfoResponse
-							p = new Packet1002InfoResponse(new String[][] {}); // makes it easier in the next line...
+							p = new Packet1002InfoResponse(new String[][] {}); // it's more concise on two lines... -> p.generatePacketHeader()
 							p = new Packet1002InfoResponse(client.grabPacket(p.generatePacketHeader()).getData());
 							connectedUsers = ((Packet1002InfoResponse) p).getResponse(Packet1002InfoResponse.CONNECTED_USERS).split(Packet1002InfoResponse.RESPONSE_DELIMITER);
+							host = ((Packet1002InfoResponse) p).getResponse(Packet1002InfoResponse.SERVER_HOST);
 							
 							// change screens
-							ScreenMenuLobby lobby = new ScreenMenuLobby(connectedUsers);
+							ScreenMenuLobby lobby = new ScreenMenuLobby(host, connectedUsers);
 							Screen.screenForward(lobby);
 						} else {
 							throw new Exception("The server doesn't exist!");

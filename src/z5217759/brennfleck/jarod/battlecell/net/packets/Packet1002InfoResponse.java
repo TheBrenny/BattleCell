@@ -5,6 +5,7 @@ import com.thebrenny.jumg.util.Logger;
 
 public class Packet1002InfoResponse extends Packet {
 	public static final String CONNECTED_USERS = "connectedUsers";
+	public static final String SERVER_HOST = "serverInfo";
 	
 	public static String RESPONSE_DELIMITER = ":nn:";
 	

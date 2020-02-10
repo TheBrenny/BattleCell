@@ -13,7 +13,7 @@ public class Packet001Disconnect extends Packet {
 	}
 	public Packet001Disconnect(byte[] data) {
 		super(PacketType.DISCONNECT.id);
-		String[] newData = readData(data).split(",");
+		String[] newData = readData(data).split(Packet.DELIMITER);
 		int index = 0;
 		this.name = newData[index++];
 		this.reason = newData[index++];

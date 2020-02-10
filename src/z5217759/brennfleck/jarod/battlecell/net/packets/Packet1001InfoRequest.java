@@ -5,7 +5,7 @@ import com.thebrenny.jumg.net.Packet;
 public class Packet1001InfoRequest extends Packet {
 	public String[] request;
 	
-	public Packet1001InfoRequest(String[] request) {
+	public Packet1001InfoRequest(String ... request) {
 		super(PacketType.INFO_REQUEST.id);
 		this.request = request;
 	}
